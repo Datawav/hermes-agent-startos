@@ -45,13 +45,11 @@ def verify_snapshots() -> None:
 
 
 def run_tests() -> bool:
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite(
-        [
-            loader.discover(str(ROOT / "operations/scripts/tests"), pattern="test_*.py"),
-            loader.discover(str(ROOT / "operations/tests"), pattern="test_*.py"),
-        ]
-    )
+    suites = []
+    for test_dir in ("operations/scripts/tests", "operations/tests"):
+        loader = unittest.TestLoader()
+        suites.append(loader.discover(str(ROOT / test_dir), pattern="test_*.py"))
+    suite = unittest.TestSuite(suites)
     return unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
 
 
