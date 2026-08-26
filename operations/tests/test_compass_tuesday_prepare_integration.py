@@ -135,6 +135,33 @@ class TuesdayPrepareTests(unittest.TestCase):
             {"model": "gpt-5.6-sol", "provider": "openai-codex"},
         )
 
+    def test_next_week_graph_is_idempotent_and_complete(self):
+        created = {}
+
+        def fake_create(*args, **kwargs):
+            key = args[4]
+            created.setdefault(key, {"id": f"t_{len(created) + 1}"})
+            return created[key]
+
+        bodies = ["research", "writing", "draft", "publication", "translation", "podcast"]
+        with patch.object(MODULE, "create_task", side_effect=fake_create):
+            first = MODULE.dispatch_graph("hermes", "2026-09-02", "/tmp/workspace", bodies)
+            second = MODULE.dispatch_graph("hermes", "2026-09-02", "/tmp/workspace", bodies)
+
+        self.assertEqual(first, second)
+        self.assertEqual(len(created), 6)
+        self.assertEqual(
+            set(created),
+            {
+                "compass-research-2026-09-02",
+                "compass-writing-2026-09-02",
+                "compass-draft-finalization-2026-09-02",
+                "compass-pipeline-2026-09-02",
+                "compass-translate-2026-09-02",
+                "compass-podcast-2026-09-02",
+            },
+        )
+
     def test_tuesday_targets_following_wednesday(self):
         now = datetime(2026, 8, 4, 14, tzinfo=timezone.utc)
         self.assertEqual(MODULE.next_wednesday(now), "2026-08-05")
