@@ -124,10 +124,34 @@ class ReconcilerTests(unittest.TestCase):
 
     def test_current_capacity_snapshot_is_authoritative(self):
         (self.root/"kanban").mkdir()
-        (self.root/"kanban/capacity-scheduler-snapshot.json").write_text(
-            '{"mode":"healthy","target":6}'
-        )
-        self.assertTrue(m.dispatcher_is_healthy(self.root))
+        (self.root/"kanban/capacity-scheduler-snapshot.json").write_text(json.dumps({
+            "mode":"healthy","target":6,"workers":2,"checked_at":2_000_000_000,
+        }))
+        self.assertTrue(m.dispatcher_is_healthy(self.root, 2_000_000_000))
+
+    def test_fresh_heavy_running_snapshot_with_spare_capacity_is_admissible(self):
+        (self.root/"kanban").mkdir()
+        snapshot = self.root/"kanban/capacity-scheduler-snapshot.json"
+        snapshot.write_text(json.dumps({
+            "mode":"heavy-running","target":6,"workers":2,"checked_at":2_000_000_000,
+        }))
+        self.assertTrue(m.dispatcher_is_healthy(self.root, 2_000_000_060))
+        snapshot.write_text(json.dumps({
+            "mode":"heavy-running","target":6,"workers":6,"checked_at":2_000_000_000,
+        }))
+        self.assertFalse(m.dispatcher_is_healthy(self.root, 2_000_000_060))
+
+    def test_stale_or_maintenance_drain_snapshot_is_not_admissible(self):
+        (self.root/"kanban").mkdir()
+        snapshot = self.root/"kanban/capacity-scheduler-snapshot.json"
+        snapshot.write_text(json.dumps({
+            "mode":"maintenance-drain","target":6,"workers":0,"checked_at":2_000_000_000,
+        }))
+        self.assertFalse(m.dispatcher_is_healthy(self.root, 2_000_000_060))
+        snapshot.write_text(json.dumps({
+            "mode":"healthy","target":6,"workers":0,"checked_at":2_000_000_000,
+        }))
+        self.assertFalse(m.dispatcher_is_healthy(self.root, 2_000_000_121))
 
     def test_compass_focus_parked_stage_is_released_with_spare_capacity(self):
         now=2_000_000_000; db=self._install_compass_stage_schema()

@@ -139,10 +139,23 @@ def unattended_commands_available(root: Path) -> bool:
     return bool(re.search(r"(?m)^\s*hooks_auto_accept:\s*true\s*$", text))
 
 
-def dispatcher_is_healthy(root: Path) -> bool:
+def dispatcher_is_healthy(root: Path, now: int | None = None) -> bool:
+    """Return true only for a fresh snapshot with usable admission capacity."""
     snapshot = load_json(root / "kanban/capacity-scheduler-snapshot.json", {})
     if snapshot:
-        return snapshot.get("mode") == "healthy" and int(snapshot.get("target", 0)) > 0
+        try:
+            checked_at = int(snapshot["checked_at"])
+            target = int(snapshot["target"])
+            workers = int(snapshot["workers"])
+        except (KeyError, TypeError, ValueError):
+            return False
+        current = int(time.time()) if now is None else now
+        age = current - checked_at
+        return (
+            0 <= age <= 120
+            and snapshot.get("mode") in {"healthy", "heavy-running"}
+            and target > workers
+        )
     try:
         text = (root / ".hermes/state/kanban_adaptive_capacity.txt").read_text()
     except OSError:
@@ -411,7 +424,7 @@ def detect_kanban(root: Path, now: int) -> list[Finding]:
             duplicate_owner_ids_by_board.setdefault(item.board, set()).add(item.subject)
     github_ready = github_auth_available(root)
     commands_ready = unattended_commands_available(root)
-    capacity_ready = dispatcher_is_healthy(root)
+    capacity_ready = dispatcher_is_healthy(root, now)
     lifecycle = load_json(root / "state/gateway.lifecycle.json", {})
     heartbeat = root / "state/gateway.heartbeat"
     gateway_ready = bool(

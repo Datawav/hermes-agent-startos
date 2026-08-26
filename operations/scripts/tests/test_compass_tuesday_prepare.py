@@ -15,6 +15,27 @@ spec.loader.exec_module(m)
 
 
 class CompassTuesdayReconcileTests(unittest.TestCase):
+    def test_draft_handoff_finishes_without_avoidable_human_gate(self):
+        prompt = """create "Compass Newsletter Pipeline ${TARGET}" \\
+  --body "legacy pipeline" \\
+  --assignee default
+create "Compass Translation ${TARGET}" \\
+  --body "translation" \\
+  --assignee default
+create "Compass Podcast Prep ${TARGET}" \\
+  --body "podcast" \\
+  --assignee default
+"""
+        draft = m.task_bodies(prompt, "2033-05-18", "none")[2]
+        publication = m.task_bodies(prompt, "2033-05-18", "none")[3]
+        self.assertIn("Tuesday is not complete until the exact draft PR exists", draft)
+        self.assertIn("Automatically omit researched-unresolved outreach identities", draft)
+        self.assertIn("MARMOT_OUTCOME", draft)
+        self.assertIn("call kanban_complete", draft)
+        self.assertNotIn("use the existing typed needs_input handoff", draft)
+        self.assertIn("Wednesday publication", publication)
+        self.assertIn("dependency block", publication)
+
     def test_current_working_target_ignores_merged_draft(self):
         listing = (
             "content/en/newsletters/2033-05-11-newsletter.md\n"
@@ -35,9 +56,9 @@ class CompassTuesdayReconcileTests(unittest.TestCase):
             (workspace / "data/newsletter_workspace/link_queue.md").write_text("## item\n")
             jobs = root / "jobs.json"
             jobs.write_text(json.dumps({"jobs": [{"id": m.JOB_ID, "prompt": "weekly prompt"}]}))
-            bodies = ["research", "writing", "pipeline", "translation", "podcast"]
+            bodies = ["research", "writing", "draft", "pipeline", "translation", "podcast"]
             expected = {name: {"id": name} for name in
-                        ("research", "writing", "pipeline", "translation", "podcast")}
+                        ("research", "writing", "draft", "pipeline", "translation", "podcast")}
             with (
                 patch.object(m, "JOBS", jobs),
                 patch.object(m, "shutil") as shutil_mock,

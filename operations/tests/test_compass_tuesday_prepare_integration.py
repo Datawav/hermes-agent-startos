@@ -111,16 +111,25 @@ class TuesdayPrepareTests(unittest.TestCase):
 
         with patch.object(MODULE, "create_task", side_effect=fake_create):
             graph = MODULE.dispatch_graph(
-                "hermes", "2026-08-26", "/tmp/workspace", ["research", "writing", "pipeline", "translation", "podcast"]
+                "hermes", "2026-09-02", "/tmp/workspace",
+                ["research", "writing", "draft", "publication", "translation", "podcast"],
             )
 
-        self.assertEqual(list(graph), ["research", "writing", "pipeline", "translation", "podcast"])
-        self.assertEqual(len(calls), 5)
+        self.assertEqual(
+            list(graph), ["research", "writing", "draft", "pipeline", "translation", "podcast"]
+        )
+        self.assertEqual(len(calls), 6)
         writing_args, writing_kwargs = calls[1]
         self.assertEqual(writing_args[6], "t_1")
         self.assertEqual(writing_kwargs, {"assignee": "geminiwriter"})
-        pipeline_args, pipeline_kwargs = calls[2]
-        self.assertEqual(pipeline_args[6], "t_2")
+        draft_args, draft_kwargs = calls[2]
+        self.assertEqual(draft_args[6], "t_2")
+        self.assertEqual(
+            draft_kwargs,
+            {"model": "gpt-5.6-sol", "provider": "openai-codex"},
+        )
+        pipeline_args, pipeline_kwargs = calls[3]
+        self.assertEqual(pipeline_args[6], "t_3")
         self.assertEqual(
             pipeline_kwargs,
             {"model": "gpt-5.6-sol", "provider": "openai-codex"},

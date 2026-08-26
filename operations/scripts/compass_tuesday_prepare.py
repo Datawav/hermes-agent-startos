@@ -98,21 +98,37 @@ def task_bodies(prompt: str, target: str, queue: str) -> list[str]:
         "complete only after all Stage 5 section gates and Stage 6 assembly checks pass. Do not perform "
         "final review, open a PR, merge, publish, sign, or broadcast."
     )
-    pipeline = (
+    draft = (
         f"Run only Stages 7-8 of skills/_COMPASS/agents/OrchestratorAgent.md for target {target}. "
         "This task is pinned to openai-codex/gpt-5.6-sol: the ReviewSwarm coordinator, all five "
         "reviewers, correction verification, factual control, and final handoff must remain Sol-owned. "
         f"Require the assembled draft and section artifacts for {target}, run every evidence-bearing "
         "review/build/link/continuity gate, apply corrections through the writing artifacts, create or "
-        "update the draft newsletter PR, and preserve draft: true. At READY FOR HUMAN REVIEW, use the "
-        "existing typed needs_input handoff and remain blocked. Do not merge, deploy, sign, broadcast, "
-        "or complete. The Wednesday publication task completes this exact Compass Newsletter Pipeline "
-        "card only after deployment and both Nostr events are independently verified."
+        "update the draft newsletter PR, and preserve draft: true. Tuesday is not complete until the "
+        "exact draft PR exists and all Stage 7 evidence plus verified-recipient outreach receipts are "
+        "durable. Automatically omit researched-unresolved outreach identities with evidence; do not "
+        "create a needs_input gate for them or for the ordinary READY FOR HUMAN REVIEW handoff. Surface "
+        "the PR and handoff once. Copy the final English Markdown to "
+        "/opt/data/blog/handoffs/deliverables/ as a regular non-symlink file, run the deterministic "
+        "Marmot delivery preflight, and record exactly one origin-bound MARMOT_OUTCOME with one MEDIA: "
+        "line. Complete only after the canonical Marmot delivery acknowledgement is durable. Do not "
+        "create a needs_input gate for the ordinary READY FOR HUMAN REVIEW handoff, and do not merge, "
+        "deploy, sign, or broadcast. On success call kanban_complete so the separate Wednesday "
+        "publication card can advance."
+    )
+    publication = (
+        f"Own only Wednesday publication for Compass {target}; Tuesday draft finalization is a parent "
+        "and must already be complete. Before Wednesday's authorized clock gates, park with a typed "
+        "dependency block rather than needs_input. At the scheduled refresh and publication windows, "
+        "follow the authoritative Compass Wednesday crons and PublishAgent gates. Complete only after "
+        "deployment and both Nostr events are independently verified. Do not treat silence at the "
+        "ordinary draft-review handoff as a publication hold, but obey any explicit owner hold."
     )
     return [
         research,
         writing,
-        pipeline,
+        draft,
+        publication,
         templates["Compass Translation"],
         templates["Compass Podcast Prep"],
     ]
@@ -229,23 +245,29 @@ def dispatch_graph(hermes: str, target: str, workspace: str,
         hermes, f"Compass Section Writing {target}", bodies[1], workspace,
         f"compass-writing-{target}", "5h", str(research["id"]), assignee="geminiwriter",
     )
+    draft = create_task(
+        hermes, f"Compass Draft Finalization {target}", bodies[2], workspace,
+        f"compass-draft-finalization-{target}", "5h", str(writing["id"]),
+        model="gpt-5.6-sol", provider="openai-codex",
+    )
     pipeline = create_task(
-        hermes, f"Compass Newsletter Pipeline {target}", bodies[2], workspace,
-        f"compass-pipeline-{target}", "5h", str(writing["id"]),
+        hermes, f"Compass Newsletter Pipeline {target}", bodies[3], workspace,
+        f"compass-pipeline-{target}", "5h", str(draft["id"]),
         model="gpt-5.6-sol", provider="openai-codex",
     )
     pipeline_id = str(pipeline["id"])
     translation = create_task(
-        hermes, f"Compass Translation {target}", bodies[3], workspace,
+        hermes, f"Compass Translation {target}", bodies[4], workspace,
         f"compass-translate-{target}", "4h", pipeline_id,
     )
     podcast = create_task(
-        hermes, f"Compass Podcast Prep {target}", bodies[4], workspace,
+        hermes, f"Compass Podcast Prep {target}", bodies[5], workspace,
         f"compass-podcast-{target}", "3h", pipeline_id,
     )
     return {
         "research": research,
         "writing": writing,
+        "draft": draft,
         "pipeline": pipeline,
         "translation": translation,
         "podcast": podcast,
@@ -320,10 +342,9 @@ def main() -> int:
         hermes = shutil.which("hermes") or "/opt/hermes/.venv/bin/hermes"
 
         dispatch_graph(hermes, target, workspace, bodies)
-        acknowledged = acknowledge_shared_queue(Path(workspace), target)
-
-        entries = len(re.findall(r"^## ", queue, re.MULTILINE))
-        print(f"✅ Compass {target} kickoff started; {entries} queued items are entering research and drafting.")
+        acknowledge_shared_queue(Path(workspace), target)
+        # Durable kickoff is reaction-only. The finalizer owns the one
+        # user-visible outcome after the full delivery contract succeeds.
         return 0
     except (OSError, RuntimeError, KeyError, StopIteration, json.JSONDecodeError, subprocess.TimeoutExpired) as exc:
         print(f"Compass Tuesday dispatch failed: {exc}", file=sys.stderr)
