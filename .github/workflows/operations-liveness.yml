@@ -1,6 +1,7 @@
 name: Operations liveness scripts
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'operations/**'
