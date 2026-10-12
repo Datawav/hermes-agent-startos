@@ -206,6 +206,8 @@ Four checks, all displayed.
 
 **"LLM Provider" is the one that distinguishes "running" from "working".** The dashboard can serve perfectly while the agent cannot answer anything, because its backend is missing, misconfigured, or — for a local runtime — not running.
 
+**The StartOS gateway check uses Hermes' held runtime lock.** Hermes 0.21.6's own process-identity check does not recognize its inline Python launcher and may still show the gateway as stopped in the dashboard even while StartOS correctly reports it running.
+
 **"Knowledge Bundle" reports the StartOS-specific knowledge**, refreshed in the background from a published source with the image's baseline as a fallback. A failure there degrades the agent's StartOS answers; it does not stop it working.
 
 ## Backups and Restore
