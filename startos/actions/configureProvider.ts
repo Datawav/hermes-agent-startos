@@ -436,6 +436,7 @@ export const configureProvider = sdk.Action.withInput(
               value: CODEX_DEVICE_URL,
               copyable: true,
               qr: true,
+              launchable: false,
               masked: false,
             },
             {
@@ -445,6 +446,7 @@ export const configureProvider = sdk.Action.withInput(
               value: codexOAuth.userCode,
               copyable: true,
               qr: false,
+              launchable: false,
               masked: false,
             },
           ],
