@@ -20,16 +20,11 @@ load_dotenv("${dataDir}/.env")
 resolve_runtime_provider()
 `
 
-// Probe the gateway daemon's own liveness via upstream's pid-file logic
-// (gateway.status.get_running_pid) — the same signal the dashboard uses. Exit 0
-// iff the gateway process is running, independent of which messaging platforms
-// (if any) the user has configured. The OpenAI-compatible API server is one
-// such opt-in platform, enabled from the dashboard — not something this package
-// forces on, so the gateway has no guaranteed listening port to probe.
+// The runtime lock, not get_running_pid: 0.21.6's identity matcher rejects its own launcher.
 const GATEWAY_PROBE = `import os, sys
 os.environ.setdefault("HERMES_HOME", "${dataDir}")
-from gateway.status import get_running_pid
-sys.exit(0 if get_running_pid() else 1)
+from gateway.status import is_gateway_runtime_lock_active
+sys.exit(0 if is_gateway_runtime_lock_active() else 1)
 `
 
 // StartOS supervises each daemon directly, but the Hermes daemons themselves

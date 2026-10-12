@@ -1,12 +1,13 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '2026.10.8:0',
+  version: '2026.10.8:1',
   releaseNotes: {
     en_US: `Updated Hermes Agent to 0.21.6 (package version 2026.10.8, the upstream release date). It rolls up about 2,100 upstream changes since 0.21.5, including security fixes for dashboard sign-in, for git commands run on untrusted repositories, and for the email gateway's sender check. New providers, plugins and integrations remain optional and require their own setup.
 
 https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
+- Fixed the Messaging Gateway health check reporting that the gateway was stopped while it was running.
 - Set Dashboard Password asks for confirmation before replacing an existing password, and says that everyone signed in to the dashboard is signed out.
 - Complete OpenAI Codex OAuth asks for confirmation before restarting Hermes.
 - Configure Provider's LLM Provider field explains each option, and its API Key and Base URL fields say what to enter.
@@ -16,6 +17,7 @@ https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
 https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
+- Corregida la comprobación de estado de la pasarela de mensajería, que indicaba que estaba detenida mientras seguía funcionando.
 - Establecer la contraseña del panel pide confirmación antes de reemplazar una contraseña existente e indica que se cierra la sesión de todos los que hayan iniciado sesión en el panel.
 - Completar OAuth de OpenAI Codex pide confirmación antes de reiniciar Hermes.
 - El campo Proveedor de LLM de Configurar proveedor explica cada opción, y sus campos Clave de API y URL base indican qué introducir.
@@ -25,6 +27,7 @@ https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
 https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
+- Die Integritätsprüfung des Messaging-Gateways meldet das Gateway nicht mehr als gestoppt, während es läuft.
 - Dashboard-Passwort festlegen fragt vor dem Ersetzen eines vorhandenen Passworts nach einer Bestätigung und weist darauf hin, dass alle am Dashboard Angemeldeten abgemeldet werden.
 - OpenAI Codex OAuth abschließen fragt vor dem Neustart von Hermes nach einer Bestätigung.
 - Das Feld LLM-Anbieter in Anbieter konfigurieren erklärt jede Option, und die Felder API-Schlüssel und Basis-URL sagen, was einzugeben ist.
@@ -34,6 +37,7 @@ https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
 https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
+- Naprawiono kontrolę stanu bramki komunikacyjnej, która zgłaszała zatrzymanie działającej bramki.
 - Ustaw hasło panelu prosi o potwierdzenie przed zastąpieniem istniejącego hasła i informuje, że wszyscy zalogowani do panelu zostaną wylogowani.
 - Zakończ OAuth OpenAI Codex prosi o potwierdzenie przed ponownym uruchomieniem Hermesa.
 - Pole Dostawca LLM w Konfiguruj dostawcę objaśnia każdą opcję, a pola Klucz API i Bazowy adres URL mówią, co wpisać.
@@ -43,6 +47,7 @@ https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
 https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6
 
+- Correction du contrôle d'état de la passerelle de messagerie, qui l'indiquait arrêtée alors qu'elle fonctionnait.
 - Définir le mot de passe du tableau de bord demande une confirmation avant de remplacer un mot de passe existant, et indique que toutes les personnes connectées au tableau de bord sont déconnectées.
 - Terminer l'OAuth OpenAI Codex demande une confirmation avant de redémarrer Hermes.
 - Le champ Fournisseur LLM de Configurer le fournisseur explique chaque option, et ses champs Clé d'API et URL de base indiquent quoi saisir.
