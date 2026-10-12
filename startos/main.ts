@@ -20,13 +20,7 @@ load_dotenv("${dataDir}/.env")
 resolve_runtime_provider()
 `
 
-// Probe the gateway daemon's own runtime lock. A live gateway holds this lock
-// for its lifetime and the kernel releases it when the process exits. Do not use
-// gateway.status.get_running_pid here: Hermes 0.21.6 launches through an inline
-// Python bootstrap whose /proc command line its identity matcher does not
-// recognize, so that helper reports the live gateway as stopped. The
-// OpenAI-compatible API server is opt-in, so there is no guaranteed port to
-// probe instead.
+// The runtime lock, not get_running_pid: 0.21.6's identity matcher rejects its own launcher.
 const GATEWAY_PROBE = `import os, sys
 os.environ.setdefault("HERMES_HOME", "${dataDir}")
 from gateway.status import is_gateway_runtime_lock_active
