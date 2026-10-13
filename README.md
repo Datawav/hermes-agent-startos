@@ -37,6 +37,8 @@
 
 One image, built here — upstream's application plus a `start-cli` binary, which is what makes server administration possible at all.
 
+The 2026.10.12 package wraps official Hermes 0.21.7. The Docker index is pinned to the final release's annotated-tag receipt. The native `install-stamp.json` remains unchanged; `startos-package-identity.json` records the wrapper calendar label and its upstream stamp hash. `UPDATING.md` owns the identity checks for future bumps.
+
 | Property      | Value                               |
 | ------------- | ----------------------------------- |
 | Image         | Built from this repo's `Dockerfile` |
