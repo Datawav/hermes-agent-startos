@@ -117,6 +117,12 @@ One interface.
 | Web Dashboard | `ui` | ui   | 9119 | Chat, configuration, sessions, skills, logs, and scheduling |
 
 Bound on the `ui-multi` MultiHost over HTTP and not masked.
+The interface adapter accepts SDK 3's ALPN array on newer hosts. On older
+supported hosts it retries only an explicit bind deserialization rejection,
+converting ALPN to the tagged specified form. Unknown/transport errors are
+never retried. TLS, dashboard authentication, port and interface identity stay
+unchanged. Build startos/interfaces.ts with ncc and run
+node docker/test-startos-binding.cjs with its built index.js before deployment.
 
 The messaging gateway is not exported — it reaches out rather than being reached.
 

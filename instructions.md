@@ -16,6 +16,8 @@ Hermes Agent runs an LLM of your choosing that can execute commands on your beha
 - **StartOS-aware skills** — a `start-cli` skill for administering this server (after _Login to StartOS_) and a `startos-support` skill backed by the Start9 documentation knowledge bundle, refreshed in the background.
 
 This package includes Hermes 0.21.7 and the preceding 0.21.6 security fixes. Optional new providers, voice features and integrations require their own configuration; upgrading does not enable them or change your selected provider.
+The Web Dashboard remains compatible with supported hosts using the older TLS
+binding format; no password, provider or network-setting reset is needed.
 
 ## Getting set up
 
