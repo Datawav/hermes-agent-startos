@@ -1,9 +1,9 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '2026.10.12:0',
+  version: '2026.10.12:1',
   releaseNotes: {
-    en_US: `Updated Hermes Agent to 0.21.7. Signed reasoning survives resumed sessions, source installations follow stable releases, and updater authorization errors are clearer. Includes the 0.21.6 security fixes and the StartOS startup/health fixes below. New providers and integrations remain optional.
+    en_US: `Updated Hermes Agent to 0.21.7. Dashboard readiness probes run inside the daemon container, avoiding newer SDK address fields absent from older hosts. Signed reasoning survives resumed sessions, source installations follow stable releases, and updater authorization errors are clearer. Includes the 0.21.6 security fixes and the StartOS startup/health fixes below. New providers and integrations remain optional.
 
 https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.7
 

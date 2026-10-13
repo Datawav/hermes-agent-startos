@@ -1,6 +1,18 @@
 // Test ncc's built interface callback and its real SDK-generated bind payload.
 const assert = require('node:assert/strict')
-const { setInterfaces } = require(require('node:path').resolve(process.argv[2]))
+const file = require('node:path').resolve(process.argv[2])
+const Module = require('node:module')
+const built = require('node:fs').readFileSync(file, 'utf8')
+const definition = 'const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {'
+assert.equal(built.split(definition).length, 2)
+const canary = new Module(file, module)
+canary.filename = file
+canary.paths = module.paths
+// Expose the existing lexical callback in memory only. It is intentionally
+// not a production export; the package init invokes it through setupInit.
+canary._compile(built.replace(definition, 'const setInterfaces = global.__bindCanary = sdk.setupInterfaces(async ({ effects }) => {'), file)
+const setInterfaces = global.__bindCanary
+delete global.__bindCanary
 const rejected = 'Invalid params: Deserialization Error: invalid type: sequence, expected string or map@bind'
 
 async function exercise(mode) {
@@ -22,6 +34,7 @@ async function exercise(mode) {
   }
   let failure
   try { await setInterfaces(effects) } catch (error) { failure = error }
+  if (!calls.length && failure) throw failure
   assert.ok(calls.every(p => p.id === 'ui-multi' && p.internalPort === 9119))
   assert.deepEqual(calls[0].addSsl.alpn, ['http/1.1'])
   if (mode === 'new' || mode === 'old') {

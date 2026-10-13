@@ -123,6 +123,11 @@ converting ALPN to the tagged specified form. Unknown/transport errors are
 never retried. TLS, dashboard authentication, port and interface identity stay
 unchanged. Build startos/interfaces.ts with ncc and run
 node docker/test-startos-binding.cjs with its built index.js before deployment.
+The dashboard readiness check probes its public health endpoint inside its own
+container as Hermes, avoiding optional host address fields absent on older
+supported StartOS. It does not change public bindings or authentication. The
+built main canary must define both daemons even when address lookup is unavailable:
+`node docker/test-startup-main.cjs javascript/index.js` after the standard ncc build.
 
 The messaging gateway is not exported — it reaches out rather than being reached.
 
